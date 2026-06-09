@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_card"
+    android:layout_marginBottom="6dp"
+    android:padding="12dp">
+
+    <!-- 第一行：来源标签 + 码值 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingBottom="6dp">
+
+        <TextView
+            android:id="@+id/tv_source"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_tag"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="2dp"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:text="ROTY_BOX"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:id="@+id/tv_key_id"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="monospace"
+            android:textSize="14sp"
+            android:textColor="@color/on_surface"
+            android:text="ROTY_BOX  1 (0x0001)" />
+
+        <!-- 编辑按钮 -->
+        <Button
+            android:id="@+id/btn_edit"
+            style="@style/Btn.Primary"
+            android:layout_width="64dp"
+            android:layout_height="36dp"
+            android:text="编辑"
+            android:textSize="12sp"
+            android:layout_marginStart="4dp" />
+
+        <!-- 删除按钮 -->
+        <Button
+            android:id="@+id/btn_delete"
+            style="@style/Btn.Outline"
+            android:layout_width="64dp"
+            android:layout_height="36dp"
+            android:text="删除"
+            android:textSize="12sp"
+            android:layout_marginStart="4dp"
+            android:textColor="@color/accent_red"
+            app:strokeColor="@color/accent_red"
+            xmlns:app="http://schemas.android.com/apk/res-auto" />
+
+    </LinearLayout>
+
+    <!-- 第二行：已配置动作 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="→  "
+            android:textSize="13sp"
+            android:textColor="@color/primary" />
+
+        <TextView
+            android:id="@+id/tv_action"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:textColor="@color/on_surface_dim"
+            android:text="无操作" />
+
+    </LinearLayout>
+
+</LinearLayout>
