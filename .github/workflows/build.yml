@@ -7,6 +7,9 @@ on:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     name: Build Debug APK
@@ -47,13 +50,17 @@ jobs:
           echo "${GRADLE_HOME}/bin" >> $GITHUB_PATH
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon --stacktrace --info 2>&1 | tail -200
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: List generated APKs
+        run: find app/build/outputs/apk -name "*.apk" | sort
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: QiyuanKeyTools-debug-${{ github.run_number }}
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
           retention-days: 30
 
   release:
@@ -95,7 +102,7 @@ jobs:
           echo "${GRADLE_HOME}/bin" >> $GITHUB_PATH
 
       - name: Build Release APK
-        run: ./gradlew assembleRelease --no-daemon --stacktrace --info 2>&1 | tail -200
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
