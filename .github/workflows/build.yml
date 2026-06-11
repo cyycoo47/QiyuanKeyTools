@@ -1,0 +1,112 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', '**/libs.versions.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      # 从 Gradle 官方 CDN 下载 8.6，生成 wrapper（含 gradle-wrapper.jar）
+      - name: Install Gradle 8.6 and generate wrapper
+        run: |
+          GRADLE_VERSION="8.6"
+          wget -q "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
+               -O /tmp/gradle-${GRADLE_VERSION}.zip
+          unzip -q /tmp/gradle-${GRADLE_VERSION}.zip -d /tmp/gradle-install
+          export GRADLE_HOME="/tmp/gradle-install/gradle-${GRADLE_VERSION}"
+          export PATH="${GRADLE_HOME}/bin:${PATH}"
+          gradle --version
+          gradle wrapper --gradle-version ${GRADLE_VERSION}
+          chmod +x gradlew
+          echo "${GRADLE_HOME}/bin" >> $GITHUB_PATH
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --no-daemon --stacktrace --info 2>&1 | tail -200
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: QiyuanKeyTools-debug-${{ github.run_number }}
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 30
+
+  release:
+    name: Release APK on Tag
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', '**/libs.versions.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Install Gradle 8.6 and generate wrapper
+        run: |
+          GRADLE_VERSION="8.6"
+          wget -q "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
+               -O /tmp/gradle-${GRADLE_VERSION}.zip
+          unzip -q /tmp/gradle-${GRADLE_VERSION}.zip -d /tmp/gradle-install
+          export GRADLE_HOME="/tmp/gradle-install/gradle-${GRADLE_VERSION}"
+          export PATH="${GRADLE_HOME}/bin:${PATH}"
+          gradle wrapper --gradle-version ${GRADLE_VERSION}
+          chmod +x gradlew
+          echo "${GRADLE_HOME}/bin" >> $GITHUB_PATH
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease --no-daemon --stacktrace --info 2>&1 | tail -200
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/apk/release/*.apk
+          name: "QiyuanKeyTools ${{ github.ref_name }}"
+          body: |
+            ## 启源按键调试工具 ${{ github.ref_name }}
+
+            ### 安装说明
+            1. 下载下方 APK 文件
+            2. `adb install -r QiyuanKeyTools-*.apk`
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
