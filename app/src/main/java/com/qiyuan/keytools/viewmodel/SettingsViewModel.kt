@@ -5,7 +5,7 @@ import android.os.Build
 import androidx.lifecycle.*
 import com.qiyuan.keytools.App
 import com.qiyuan.keytools.sdk.KeySdkManager
-import kotlinx.coroutines.flow.asLiveData
+import androidx.lifecycle.asLiveData
 
 /**
  * 设置页面 ViewModel
